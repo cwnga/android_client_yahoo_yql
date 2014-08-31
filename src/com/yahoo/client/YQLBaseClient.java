@@ -1,11 +1,12 @@
 package com.yahoo.client;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -17,13 +18,56 @@ import android.widget.ListView;
 /**
  * @author cwnga
  * 
+ *         YQLBaseClient YQLBaseClient = new YQLBaseClient();
+ *         YQLBaseClient.setListener(new CallBackListener() { public void
+ *         callback(JSONObject result) {
+ *         Log.d("callbackcallbackcallbackcallback", "12112");
+ * 
+ *         Log.d("ererer", result.toString());
+ * 
+ *         } });
+ * 
+ *         YQLBaseClient.execute();
  */
 public class YQLBaseClient extends AsyncTask<Void, Void, Void> {
 	public JSONObject result;
+	public String yqlUrl = "https://query.yahooapis.com/v1/public/yql?q=";
 
-	public void getWeather() {
+	public void getWeather(String woeid) {
+		if (woeid == "") {
+			woeid = "2306179";
+
+		}
+		String yql = "select * from weather.forecast where woeid=" + woeid;
+		yql = encodeUrl(yql);
+		yqlUrl = yqlUrl + yql+"&format=json";
 		this.execute();
 
+	}
+
+	/**
+	 * 
+	 */
+	public void execute() {
+		Log.d("YQLBaseClient", "url:" + this.yqlUrl);
+		super.execute();
+	}
+
+	// select * from json where
+	// url="http://search.twitter.com/search.json?q=puppy"
+
+	/**
+	 * @param string
+	 * @return
+	 */
+	protected String encodeUrl(String string) {
+		try {
+			string = URLEncoder.encode(string, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return string;
 	}
 
 	/*
@@ -48,8 +92,7 @@ public class YQLBaseClient extends AsyncTask<Void, Void, Void> {
 		// Create the array
 		ArrayList<HashMap<String, String>> arraylist = new ArrayList<HashMap<String, String>>();
 		// YQL JSON URL
-		String url = "http://query.yahooapis.com/v1/public/yql?q=SELECT%20*%20FROM%20google.books%20WHERE%20q%3D%22android%22%20AND%20maxResults%3D5%20AND%20startIndex%3D1&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
-
+		String url = this.yqlUrl;
 		try {
 			// Retrive JSON Objects from the given URL in JSONfunctions.class
 			JSONObject json_data = JSONfunctions.getJSONfromURL(url);
@@ -87,6 +130,9 @@ public class YQLBaseClient extends AsyncTask<Void, Void, Void> {
 		if (mListener != null) {
 			mListener.callback(this.result);
 		}
+
+		Log.d("YQLBaseClient", "result:" + this.result.toString());
+	
 		// Locate the listview in listview_main.xml
 		// listview = (ListView) findViewById(R.id.listview);
 		// Pass the results into ListViewAdapter.java
